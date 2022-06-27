@@ -1,11 +1,16 @@
 import { Booking } from '../domain-model/booking';
+import { BookingCreatedEvent } from '../domain-model/bookingCreatedEvent';
 import { DateProvider } from '../gateways/date-provision/dateProvider';
 import { BookingRepository } from '../gateways/repositories/bookingRepository';
+import { DomainEventRepository } from '../gateways/repositories/domainEventRepository';
+import { UuidGenerator } from '../gateways/uuid-generation/uuidGenerator';
 
 export class BookFlyCommandHandler {
   constructor(
     private readonly bookingRepository: BookingRepository,
+    private readonly domainEventRepository: DomainEventRepository,
     private readonly dateProvider: DateProvider,
+    private readonly domainEventUuidGenerator: UuidGenerator,
   ) {}
 
   async handle(booking: Booking) {
@@ -25,6 +30,15 @@ export class BookFlyCommandHandler {
     }
 
     booking.price = booking.distance * coefficient;
+
     await this.bookingRepository.save(booking);
+
+    await this.domainEventRepository.save(
+      new BookingCreatedEvent(
+        this.domainEventUuidGenerator.generate(),
+        this.dateProvider,
+        booking.id,
+      ),
+    );
   }
 }
