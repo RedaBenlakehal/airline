@@ -12,6 +12,10 @@ export class InMemoryBookingRepository implements BookingRepository {
     return this._bookings[bookingId];
   }
 
+  get bookings() {
+    return this._bookings;
+  }
+
   set bookings(bookings: Record<string, Booking>) {
     this._bookings = bookings;
   }

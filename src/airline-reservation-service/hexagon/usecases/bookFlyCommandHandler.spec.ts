@@ -1,10 +1,10 @@
 import { InMemoryDomainEventRepository } from '../../../airline-reservation-service/adapters/secondary/repositories/inMemoryDomainEventRepository';
 import { FakeDateProvider } from '../../../airline-reservation-service/adapters/secondary/date-provision/fakeDateProvider';
 import { InMemoryBookingRepository } from '../../../airline-reservation-service/adapters/secondary/repositories/InMemoryBookingRepository';
-import { Booking } from '../domain-model/booking';
 import { BookingCreatedEvent } from '../domain-model/bookingCreatedEvent';
 import { BookFlyCommandHandler } from './bookFlyCommandHandler';
 import { FakeUuidGenerator } from '../../../airline-reservation-service/adapters/secondary/uuid-generation/fakeUuidGenerator';
+import { Booking } from '../domain-model/booking';
 
 describe('book a fly', () => {
   let bookFlyCommandHandler: BookFlyCommandHandler;
@@ -12,18 +12,24 @@ describe('book a fly', () => {
   let domainEventRepository: InMemoryDomainEventRepository;
   let dateProvider: FakeDateProvider;
   let domainEventUuidGenerator: FakeUuidGenerator;
+  let bookingUuidGenerator: FakeUuidGenerator;
 
   beforeEach(() => {
     bookingRepository = new InMemoryBookingRepository();
     domainEventRepository = new InMemoryDomainEventRepository();
     dateProvider = new FakeDateProvider();
     domainEventUuidGenerator = new FakeUuidGenerator();
+    bookingUuidGenerator = new FakeUuidGenerator();
     bookFlyCommandHandler = new BookFlyCommandHandler(
       bookingRepository,
       domainEventRepository,
       dateProvider,
+      bookingUuidGenerator,
       domainEventUuidGenerator,
     );
+
+    domainEventUuidGenerator.next = '123abc';
+    bookingUuidGenerator.next = 'abc123';
   });
 
   describe('book on date when coefficient equal to 1', () => {
@@ -32,16 +38,16 @@ describe('book a fly', () => {
     });
 
     it('should book a fly successfully', async () => {
-      bookFlyCommandHandler.handle(
-        new Booking('abc123', 'Paris', 'New York', 5834),
-      );
+      await bookFlyCommandHandler.handle('Paris', 'New York', 5834);
 
-      expect(await bookingRepository.byId('abc123')).toEqual({
-        _id: 'abc123',
-        _from: 'Paris',
-        _to: 'New York',
-        _distance: 5834,
-        _price: 5834,
+      expect(bookingRepository.bookings).toEqual({
+        [bookingUuidGenerator.generate()]: new Booking(
+          bookingUuidGenerator.generate(),
+          'Paris',
+          'New York',
+          5834,
+          5834,
+        ),
       });
     });
   });
@@ -52,16 +58,16 @@ describe('book a fly', () => {
     });
 
     it('should book a fly successfully on Monday', async () => {
-      bookFlyCommandHandler.handle(
-        new Booking('abc123', 'Paris', 'New York', 5834),
-      );
+      await bookFlyCommandHandler.handle('Paris', 'New York', 5834);
 
-      expect(await bookingRepository.byId('abc123')).toEqual({
-        _id: 'abc123',
-        _from: 'Paris',
-        _to: 'New York',
-        _distance: 5834,
-        _price: 5834 * 50.7,
+      expect(bookingRepository.bookings).toEqual({
+        [bookingUuidGenerator.generate()]: new Booking(
+          bookingUuidGenerator.generate(),
+          'Paris',
+          'New York',
+          5834,
+          5834 * 50.7,
+        ),
       });
     });
   });
@@ -72,16 +78,16 @@ describe('book a fly', () => {
     });
 
     it('should book a fly successfully on Tuesday', async () => {
-      bookFlyCommandHandler.handle(
-        new Booking('abc123', 'Paris', 'New York', 5834),
-      );
+      await bookFlyCommandHandler.handle('Paris', 'New York', 5834);
 
-      expect(await bookingRepository.byId('abc123')).toEqual({
-        _id: 'abc123',
-        _from: 'Paris',
-        _to: 'New York',
-        _distance: 5834,
-        _price: 5834 * 5824,
+      expect(bookingRepository.bookings).toEqual({
+        [bookingUuidGenerator.generate()]: new Booking(
+          bookingUuidGenerator.generate(),
+          'Paris',
+          'New York',
+          5834,
+          5834 * 5824,
+        ),
       });
     });
   });
@@ -92,16 +98,16 @@ describe('book a fly', () => {
     });
 
     it('should book a fly successfully on Wednesday', async () => {
-      bookFlyCommandHandler.handle(
-        new Booking('abc123', 'Paris', 'New York', 5834),
-      );
+      await bookFlyCommandHandler.handle('Paris', 'New York', 5834);
 
-      expect(await bookingRepository.byId('abc123')).toEqual({
-        _id: 'abc123',
-        _from: 'Paris',
-        _to: 'New York',
-        _distance: 5834,
-        _price: 5834 * ('Paris'.length + 'New York'.length),
+      expect(bookingRepository.bookings).toEqual({
+        [bookingUuidGenerator.generate()]: new Booking(
+          bookingUuidGenerator.generate(),
+          'Paris',
+          'New York',
+          5834,
+          5834 * ('Paris'.length + 'New York'.length),
+        ),
       });
     });
   });
@@ -109,27 +115,26 @@ describe('book a fly', () => {
   describe('book when coefficient is one and domain event is created successfully', () => {
     beforeEach(() => {
       dateProvider.dateOfNow = new Date('6/26/22');
-      domainEventUuidGenerator.next = '123abc';
     });
 
     it('should book a fly successfully and create a domain event successfully', async () => {
-      bookFlyCommandHandler.handle(
-        new Booking('abc123', 'Paris', 'New York', 5834),
-      );
+      await bookFlyCommandHandler.handle('Paris', 'New York', 5834);
 
-      expect(await bookingRepository.byId('abc123')).toEqual({
-        _id: 'abc123',
-        _from: 'Paris',
-        _to: 'New York',
-        _distance: 5834,
-        _price: 5834,
+      expect(bookingRepository.bookings).toEqual({
+        [bookingUuidGenerator.generate()]: new Booking(
+          bookingUuidGenerator.generate(),
+          'Paris',
+          'New York',
+          5834,
+          5834,
+        ),
       });
 
       expect(domainEventRepository.events).toEqual([
         new BookingCreatedEvent(
           domainEventUuidGenerator.generate(),
           dateProvider,
-          'abc123',
+          bookingUuidGenerator.generate(),
         ),
       ]);
     });

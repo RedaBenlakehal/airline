@@ -16,20 +16,4 @@ export class Booking {
   get id(): string {
     return this._id;
   }
-
-  get distance(): number {
-    return this._distance;
-  }
-
-  set price(price: number) {
-    this._price = price;
-  }
-
-  get from(): string {
-    return this._from;
-  }
-
-  get to(): string {
-    return this._to;
-  }
 }

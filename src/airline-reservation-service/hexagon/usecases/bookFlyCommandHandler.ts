@@ -10,10 +10,12 @@ export class BookFlyCommandHandler {
     private readonly bookingRepository: BookingRepository,
     private readonly domainEventRepository: DomainEventRepository,
     private readonly dateProvider: DateProvider,
+    private readonly bookingUuidGenerator: UuidGenerator,
     private readonly domainEventUuidGenerator: UuidGenerator,
   ) {}
 
-  async handle(booking: Booking) {
+  async handle(from: string, to: string, distance: number) {
+    const bookingId = this.bookingUuidGenerator.generate();
     const currentDay = this.dateProvider.now().getDay();
     let coefficient = 1;
 
@@ -22,22 +24,24 @@ export class BookFlyCommandHandler {
     }
 
     if (currentDay === 2) {
-      coefficient = booking.distance - 10;
+      coefficient = distance - 10;
     }
 
     if (currentDay === 3) {
-      coefficient = booking.from.length + booking.to.length;
+      coefficient = from.length + to.length;
     }
 
-    booking.price = booking.distance * coefficient;
+    const price = distance * coefficient;
 
-    await this.bookingRepository.save(booking);
+    await this.bookingRepository.save(
+      new Booking(bookingId, from, to, distance, price),
+    );
 
     await this.domainEventRepository.save(
       new BookingCreatedEvent(
         this.domainEventUuidGenerator.generate(),
         this.dateProvider,
-        booking.id,
+        bookingId,
       ),
     );
   }
