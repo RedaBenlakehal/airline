@@ -1,26 +1,8 @@
-import { InjectModel, Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Model } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { Booking } from 'src/airline-reservation-service/hexagon/domain-model/booking';
 import { BookingRepository } from 'src/airline-reservation-service/hexagon/gateways/repositories/bookingRepository';
-
-@Schema({ autoCreate: true })
-export class MongodbBooking {
-  @Prop()
-  _from: string;
-
-  @Prop()
-  _to: string;
-
-  @Prop()
-  _distance: number;
-
-  @Prop()
-  _price: number;
-}
-
-export type BookingDocument = MongodbBooking & Document;
-
-export const BookingSchema = SchemaFactory.createForClass(MongodbBooking);
+import { MongodbBooking, BookingDocument } from './booking.schema';
 
 export class InMongodbBookingRepository implements BookingRepository {
   constructor(
@@ -35,9 +17,6 @@ export class InMongodbBookingRepository implements BookingRepository {
       _distance: booking.distance,
       _price: booking.price,
     });
-
-    const test = await this.bookingModel.findById('62be371f94ae315e277e83fa');
-    console.log(test);
 
     await createdBooking.save();
   }
