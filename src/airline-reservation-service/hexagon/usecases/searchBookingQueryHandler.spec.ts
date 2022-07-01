@@ -1,4 +1,4 @@
-import { InMemoryBookingRepository } from '../../../airline-reservation-service/adapters/secondary/repositories/InMemoryBookingRepository';
+import { InMemoryBookingRepository } from '../../adapters/secondary/repositories/booking/InMemoryBookingRepository';
 import { Booking } from '../domain-model/booking';
 import { SearchBookingQueryHandler } from './searchBookingQueryHandler';
 

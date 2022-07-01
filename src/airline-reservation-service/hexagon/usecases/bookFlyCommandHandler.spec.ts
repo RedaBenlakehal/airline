@@ -1,6 +1,6 @@
 import { InMemoryDomainEventRepository } from '../../../airline-reservation-service/adapters/secondary/repositories/inMemoryDomainEventRepository';
 import { FakeDateProvider } from '../../../airline-reservation-service/adapters/secondary/date-provision/fakeDateProvider';
-import { InMemoryBookingRepository } from '../../../airline-reservation-service/adapters/secondary/repositories/InMemoryBookingRepository';
+import { InMemoryBookingRepository } from '../../adapters/secondary/repositories/booking/InMemoryBookingRepository';
 import { BookingCreatedEvent } from '../domain-model/bookingCreatedEvent';
 import { BookFlyCommandHandler } from './bookFlyCommandHandler';
 import { FakeUuidGenerator } from '../../../airline-reservation-service/adapters/secondary/uuid-generation/fakeUuidGenerator';
