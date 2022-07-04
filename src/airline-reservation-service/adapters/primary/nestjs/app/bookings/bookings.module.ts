@@ -16,6 +16,7 @@ import { BookFlyCommandHandler } from 'src/airline-reservation-service/hexagon/u
 
 import { BookingsController } from './bookings.controller';
 import { BookingService } from './booking.service';
+import { ObjectIdGenerator } from 'src/airline-reservation-service/adapters/secondary/object-id-generation/objectidGenerator';
 
 @Module({
   imports: [
@@ -32,13 +33,14 @@ import { BookingService } from './booking.service';
         inMongodbBookingRepository: InMongodbBookingRepository,
         inMemoryDomainEventRepository: InMemoryDomainEventRepository,
         realDateProvider: RealDateProvider,
+        objectIdGenerator: ObjectIdGenerator,
         realUuidGenerator: RealUuidGenerator,
       ) => {
         return new BookFlyCommandHandler(
           inMongodbBookingRepository,
           inMemoryDomainEventRepository,
           realDateProvider,
-          realUuidGenerator,
+          objectIdGenerator,
           realUuidGenerator,
         );
       },
@@ -46,7 +48,7 @@ import { BookingService } from './booking.service';
         'inMongodbBookingRepository',
         'inMemoryDomainEventRepository',
         'realDateProvider',
-        'realUuidGenerator',
+        'objectIdGenerator',
         'realUuidGenerator',
       ],
     },
@@ -69,6 +71,11 @@ import { BookingService } from './booking.service';
     {
       provide: 'realUuidGenerator',
       useClass: RealUuidGenerator,
+    },
+
+    {
+      provide: 'objectIdGenerator',
+      useClass: ObjectIdGenerator,
     },
   ],
 })
